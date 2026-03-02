@@ -133,6 +133,16 @@ export function FeedClient({ cards }: Props) {
   }, [currentStep, currentCardIndex, resetHintTimer]);
 
   /* ── 네비게이션 ── */
+  const goNextCard = useCallback(() => {
+    if (currentCardIndex < shuffledCards.length - 1) {
+      setDirection(1);
+      setIsCardTransition(true);
+      setCurrentCardIndex(i => i + 1);
+      setCurrentStep(0);
+      resetHintTimer();
+    }
+  }, [currentCardIndex, shuffledCards.length, resetHintTimer]);
+
   const goNext = useCallback(() => {
     if (!card) return;
     setDirection(1);
@@ -332,15 +342,13 @@ export function FeedClient({ cards }: Props) {
         </AnimatePresence>
       </div>
 
-      {/* ── 하단 탭 영역 (z-40, 투명) ── */}
-      {!isOutro && (
-        <div
-          className="absolute bottom-0 left-0 right-0 z-40"
-          style={{ height: '18%' }}
-          onClick={(e) => { e.stopPropagation(); resetHintTimer(); goNext(); }}
-          aria-label="다음 스텝"
-        />
-      )}
+      {/* ── 하단 탭 영역 (z-40, 투명) — 항상 표시, 다음 카드로 이동 ── */}
+      <div
+        className="absolute bottom-0 left-0 right-0 z-40"
+        style={{ height: '18%' }}
+        onClick={(e) => { e.stopPropagation(); resetHintTimer(); goNextCard(); }}
+        aria-label="다음 카드"
+      />
 
       {/* ── 하단 네비게이션 바 (Safe Area 대응) ── */}
       <div
@@ -451,37 +459,6 @@ export function FeedClient({ cards }: Props) {
         )}
       </AnimatePresence>
 
-      {/* ── 세로 스와이프 힌트 (어느 스텝에서나 표시) ── */}
-      <AnimatePresence>
-        {!isLastCard && showProgressHint && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4 }}
-            transition={{ duration: 0.4 }}
-            className="pointer-events-none absolute bottom-24 left-1/2 z-30 -translate-x-1/2"
-          >
-            <motion.div
-              animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 1.0, repeat: Infinity, ease: 'easeInOut' }}
-              className="flex flex-col items-center gap-1"
-            >
-              <span
-                className="text-xl"
-                style={{ color: `${cat?.accent ?? '#6366f1'}80` }}
-              >
-                ↑
-              </span>
-              <span
-                className="text-[10px] font-medium"
-                style={{ color: `${cat?.accent ?? '#6366f1'}60` }}
-              >
-                위로 스와이프
-              </span>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
