@@ -62,10 +62,19 @@ function getMotionConfig(variant: TransitionVariant, direction: 1 | -1): MotionC
   }
 }
 
+/** 카드→카드 세로 전환 motion 설정 */
+const CARD_CHANGE_MOTION: MotionConfig = {
+  initial: { opacity: 0, y: 40 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -40 },
+  duration: 0.32,
+};
+
 export function FeedClient({ cards }: Props) {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
+  const [isCardTransition, setIsCardTransition] = useState(false);
   const [showTapHint, setShowTapHint] = useState(false);
   const [showProgressHint, setShowProgressHint] = useState(false);
 
@@ -109,8 +118,10 @@ export function FeedClient({ cards }: Props) {
     if (!card) return;
     setDirection(1);
     if (currentStep < card.steps.length - 1) {
+      setIsCardTransition(false);
       setCurrentStep(s => s + 1);
     } else if (currentCardIndex < cards.length - 1) {
+      setIsCardTransition(true);
       setCurrentCardIndex(i => i + 1);
       setCurrentStep(0);
     }
@@ -119,9 +130,11 @@ export function FeedClient({ cards }: Props) {
   const goPrev = useCallback(() => {
     setDirection(-1);
     if (currentStep > 0) {
+      setIsCardTransition(false);
       setCurrentStep(s => s - 1);
     } else if (currentCardIndex > 0) {
       const prevCard = cards[currentCardIndex - 1];
+      setIsCardTransition(true);
       setCurrentCardIndex(i => i - 1);
       setCurrentStep(prevCard ? prevCard.steps.length - 1 : 0);
     }
@@ -130,6 +143,7 @@ export function FeedClient({ cards }: Props) {
   const goToStep = useCallback((index: number) => {
     if (!card) return;
     setDirection(index > currentStep ? 1 : -1);
+    setIsCardTransition(false);
     setCurrentStep(index);
   }, [card, currentStep]);
 
@@ -146,13 +160,25 @@ export function FeedClient({ cards }: Props) {
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     const dx = e.changedTouches[0].clientX - touchStartX.current;
     const dy = e.changedTouches[0].clientY - touchStartY.current;
-    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+
+    // 가로 스와이프 (스텝 이동) — 임계값 40px (모바일 최적화)
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.4) {
       isSwiping.current = true;
       resetHintTimer();
       if (dx < 0) goNext();
       else goPrev();
     }
-  }, [goNext, goPrev, resetHintTimer]);
+    // 세로 스와이프 위로 (다음 카드로 직접 이동)
+    else if (dy < -60 && Math.abs(dy) > Math.abs(dx) * 1.4) {
+      isSwiping.current = true;
+      if (currentCardIndex < cards.length - 1) {
+        setIsCardTransition(true);
+        setCurrentCardIndex(i => i + 1);
+        setCurrentStep(0);
+        resetHintTimer();
+      }
+    }
+  }, [goNext, goPrev, resetHintTimer, currentCardIndex, cards.length]);
 
   /* ── 탭 핸들러 (좌 30% = 이전, 우 70% = 다음) ── */
   const handleTap = useCallback((e: React.MouseEvent) => {
@@ -181,8 +207,15 @@ export function FeedClient({ cards }: Props) {
 
   const stepType = step.type as string;
   const variant = getTransitionVariant(stepType);
-  const motionCfg = getMotionConfig(variant, direction);
   const isOutro = stepType === 'outro';
+
+  // 카드→카드 전환 시 세로(y) 방향, 스텝 내 전환 시 기존 방향
+  const motionCfg = isCardTransition ? CARD_CHANGE_MOTION : getMotionConfig(variant, direction);
+
+  // AnimatePresence key: 카드 전환 시 card-{idx}, 스텝 전환 시 step-{cardIdx}-{stepIdx}
+  const motionKey = isCardTransition
+    ? `card-${currentCardIndex}`
+    : `step-${currentCardIndex}-${currentStep}`;
 
   return (
     <div
@@ -250,7 +283,7 @@ export function FeedClient({ cards }: Props) {
       <div className="absolute inset-0">
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
-            key={`${currentCardIndex}-${currentStep}`}
+            key={motionKey}
             initial={motionCfg.initial}
             animate={motionCfg.animate}
             exit={motionCfg.exit}
@@ -279,8 +312,11 @@ export function FeedClient({ cards }: Props) {
         />
       )}
 
-      {/* ── 하단 네비게이션 바 ── */}
-      <div className="absolute bottom-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-4 pointer-events-none">
+      {/* ── 하단 네비게이션 바 (Safe Area 대응) ── */}
+      <div
+        className="absolute bottom-0 left-0 right-0 z-50 flex items-center justify-between px-4 pt-4 pointer-events-none"
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         <button
           onClick={(e) => { e.stopPropagation(); goPrev(); }}
           disabled={isFirst}
@@ -357,6 +393,38 @@ export function FeedClient({ cards }: Props) {
               style={{ color: `${cat?.accent ?? '#6366f1'}60` }}
             >
               ›
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── outro 세로 스와이프 힌트 (다음 카드가 있을 때) ── */}
+      <AnimatePresence>
+        {isOutro && !isLastCard && showProgressHint && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.4 }}
+            className="pointer-events-none absolute bottom-24 left-1/2 z-30 -translate-x-1/2"
+          >
+            <motion.div
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 1.0, repeat: Infinity, ease: 'easeInOut' }}
+              className="flex flex-col items-center gap-1"
+            >
+              <span
+                className="text-xl"
+                style={{ color: `${cat?.accent ?? '#6366f1'}80` }}
+              >
+                ↑
+              </span>
+              <span
+                className="text-[10px] font-medium"
+                style={{ color: `${cat?.accent ?? '#6366f1'}60` }}
+              >
+                위로 스와이프
+              </span>
             </motion.div>
           </motion.div>
         )}
