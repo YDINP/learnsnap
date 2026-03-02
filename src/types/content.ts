@@ -1,4 +1,4 @@
-export type CategoryKey = 'grammar' | 'knowledge' | 'hanja' | 'idiom' | 'spelling' | 'math' | 'science' | 'history';
+export type CategoryKey = 'grammar' | 'knowledge' | 'hanja' | 'idiom' | 'spelling' | 'science' | 'history';
 export type Difficulty = 1 | 2 | 3;
 
 // 재사용 스텝 타입 (SnapWise 호환)
