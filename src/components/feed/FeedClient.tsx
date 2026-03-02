@@ -288,11 +288,11 @@ export function FeedClient({ cards }: Props) {
             ✕
           </Link>
 
-          {/* 앱 브랜드 타이틀 */}
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-sm font-bold tracking-wide text-white/80">
-              LearnSnap
-            </span>
+          {/* 현재 카드 제목 */}
+          <div className="flex-1 px-3 min-w-0">
+            <p className="text-xs font-medium text-white/70 truncate text-center">
+              {card.title}
+            </p>
           </div>
 
           {/* 카드 인덱스 */}
