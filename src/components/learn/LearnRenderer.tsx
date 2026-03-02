@@ -19,7 +19,6 @@ export function LearnRenderer({ step }: Props) {
     case 'memory-tip': return <MemoryTipStep content={step.content} />;
     case 'summary': return <SummaryStep content={step.content} />;
 
-    // 공유 스텝 타입 (기본 렌더링)
     case 'cinematic-hook':
     case 'narration':
     case 'impact':
@@ -27,7 +26,7 @@ export function LearnRenderer({ step }: Props) {
     case 'outro':
       return (
         <div className="py-4">
-          <p className="text-gray-800 text-base leading-relaxed whitespace-pre-line">{step.content}</p>
+          <p className="text-gray-200 text-base leading-relaxed whitespace-pre-line">{step.content}</p>
         </div>
       );
 
@@ -35,26 +34,26 @@ export function LearnRenderer({ step }: Props) {
     case 'stat':
     case 'data-viz':
       return (
-        <div className="bg-gray-50 rounded-xl p-4 my-3">
-          <p className="text-gray-700 text-sm whitespace-pre-line">{step.content}</p>
+        <div className="bg-[#242424] rounded-xl p-4 my-3 border border-gray-800">
+          <p className="text-gray-300 text-sm whitespace-pre-line">{step.content}</p>
         </div>
       );
 
     case 'reveal-title':
       return (
         <div className="text-center py-6">
-          <p className="text-2xl font-bold text-gray-900">{step.content}</p>
+          <p className="text-2xl font-bold text-white">{step.content}</p>
         </div>
       );
 
     case 'steps':
       return (
-        <div className="bg-gray-50 rounded-xl p-4 my-3">
-          <p className="text-gray-700 text-sm whitespace-pre-line">{step.content}</p>
+        <div className="bg-[#242424] rounded-xl p-4 my-3 border border-gray-800">
+          <p className="text-gray-300 text-sm whitespace-pre-line">{step.content}</p>
         </div>
       );
 
     default:
-      return <p className="text-gray-600 py-2">{step.content}</p>;
+      return <p className="text-gray-400 py-2">{step.content}</p>;
   }
 }
