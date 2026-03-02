@@ -563,7 +563,9 @@ function OutroView({ step, card, isActive, isLastCard }: { step: CardStep; card:
 /* ────────────────────────────────────────────────────────
    메인 라우터
    ──────────────────────────────────────────────────────── */
-export function SwipeStepRenderer({ step, card, isActive, stepIndex, totalSteps, isLastCard = false }: Props) {
+
+/** 스텝 타입에 따라 적절한 뷰 컴포넌트를 반환하는 헬퍼 */
+function renderStep(step: CardStep, card: CardMeta, isActive: boolean, isLastCard: boolean) {
   switch (step.type) {
     case 'cinematic-hook':
       return <CinematicHookView step={step} card={card} isActive={isActive} />;
@@ -604,4 +606,49 @@ export function SwipeStepRenderer({ step, card, isActive, stepIndex, totalSteps,
         </div>
       );
   }
+}
+
+export function SwipeStepRenderer({ step, card, isActive, stepIndex, totalSteps, isLastCard = false }: Props) {
+  const cat = CATEGORIES.find(c => c.key === card.category);
+  const isLastStep = stepIndex === totalSteps - 1;
+  const isOutroType = step.type === 'outro';
+
+  const rendered = renderStep(step, card, isActive, isLastCard);
+
+  // 마지막 스텝이지만 outro 타입이 아닌 경우: 끝마치는 배지 오버레이 추가
+  if (isLastStep && !isOutroType) {
+    return (
+      <div className="relative w-full h-full">
+        {rendered}
+        {/* 완료 배지 — 화면 상단에 고정 */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+          className="pointer-events-none absolute top-0 left-0 right-0 flex justify-center pt-14 z-20"
+        >
+          <div
+            className="flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold text-white/90"
+            style={{ backgroundColor: `${cat?.accent ?? '#6366f1'}30`, border: `1px solid ${cat?.accent ?? '#6366f1'}50` }}
+          >
+            <span>✅</span>
+            <span>학습 완료</span>
+          </div>
+        </motion.div>
+        {/* 하단 완료 힌트 */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={isActive ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+          className="pointer-events-none absolute bottom-28 left-0 right-0 flex justify-center z-20"
+        >
+          <p className="text-xs font-medium" style={{ color: `${cat?.accent ?? '#6366f1'}90` }}>
+            {isLastCard ? '모든 카드를 완료했어요 🎉' : '위로 스와이프하면 다음 카드 ↑'}
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return rendered;
 }
