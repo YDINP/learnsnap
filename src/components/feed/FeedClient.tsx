@@ -70,10 +70,19 @@ const CARD_CHANGE_MOTION: MotionConfig = {
   duration: 0.32,
 };
 
+/** Fisher-Yates shuffle — 클라이언트에서 1회 실행 */
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export function FeedClient({ cards }: Props) {
-  const [currentCardIndex, setCurrentCardIndex] = useState(() =>
-    cards.length > 0 ? Math.floor(Math.random() * cards.length) : 0
-  );
+  const [shuffledCards] = useState(() => shuffleArray(cards));
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [isCardTransition, setIsCardTransition] = useState(false);
@@ -87,9 +96,9 @@ export function FeedClient({ cards }: Props) {
   const isSwiping = useRef(false);
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const card = cards[currentCardIndex];
+  const card = shuffledCards[currentCardIndex];
   const cat = card ? CATEGORIES.find(c => c.key === card.category) : undefined;
-  const isLastCard = currentCardIndex === cards.length - 1;
+  const isLastCard = currentCardIndex === shuffledCards.length - 1;
 
   /* ── 탭 힌트 (처음 카드, 처음 스텝에서 2.5초 후 fade-out) ── */
   useEffect(() => {
@@ -130,12 +139,12 @@ export function FeedClient({ cards }: Props) {
     if (currentStep < card.steps.length - 1) {
       setIsCardTransition(false);
       setCurrentStep(s => s + 1);
-    } else if (currentCardIndex < cards.length - 1) {
+    } else if (currentCardIndex < shuffledCards.length - 1) {
       setIsCardTransition(true);
       setCurrentCardIndex(i => i + 1);
       setCurrentStep(0);
     }
-  }, [card, currentStep, currentCardIndex, cards.length]);
+  }, [card, currentStep, currentCardIndex, shuffledCards.length]);
 
   const goPrev = useCallback(() => {
     setDirection(-1);
@@ -143,12 +152,12 @@ export function FeedClient({ cards }: Props) {
       setIsCardTransition(false);
       setCurrentStep(s => s - 1);
     } else if (currentCardIndex > 0) {
-      const prevCard = cards[currentCardIndex - 1];
+      const prevCard = shuffledCards[currentCardIndex - 1];
       setIsCardTransition(true);
       setCurrentCardIndex(i => i - 1);
       setCurrentStep(prevCard ? prevCard.steps.length - 1 : 0);
     }
-  }, [currentStep, currentCardIndex, cards]);
+  }, [currentStep, currentCardIndex, shuffledCards]);
 
   const goToStep = useCallback((index: number) => {
     if (!card) return;
@@ -181,7 +190,7 @@ export function FeedClient({ cards }: Props) {
     // 세로 스와이프 위로 (다음 카드로 직접 이동)
     else if (dy < -60 && Math.abs(dy) > Math.abs(dx) * 1.4) {
       isSwiping.current = true;
-      if (currentCardIndex < cards.length - 1) {
+      if (currentCardIndex < shuffledCards.length - 1) {
         setIsCardTransition(true);
         setCurrentCardIndex(i => i + 1);
         setCurrentStep(0);
@@ -192,14 +201,14 @@ export function FeedClient({ cards }: Props) {
     else if (dy > 60 && Math.abs(dy) > Math.abs(dx) * 1.4) {
       isSwiping.current = true;
       if (currentCardIndex > 0) {
-        const prevCard = cards[currentCardIndex - 1];
+        const prevCard = shuffledCards[currentCardIndex - 1];
         setIsCardTransition(true);
         setCurrentCardIndex(i => i - 1);
         setCurrentStep(prevCard ? prevCard.steps.length - 1 : 0);
         resetHintTimer();
       }
     }
-  }, [goNext, goPrev, resetHintTimer, currentCardIndex, cards.length, cards]);
+  }, [goNext, goPrev, resetHintTimer, currentCardIndex, shuffledCards]);
 
   /* ── 탭 핸들러 (좌 30% = 이전, 우 70% = 다음) ── */
   const handleTap = useCallback((e: React.MouseEvent) => {
@@ -213,7 +222,7 @@ export function FeedClient({ cards }: Props) {
   }, [goNext, goPrev, resetHintTimer]);
 
   /* ── 빈 상태 ── */
-  if (cards.length === 0) {
+  if (shuffledCards.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-dvh bg-[#0d0d0d]">
         <p className="text-gray-600">카드가 없습니다.</p>
@@ -283,7 +292,7 @@ export function FeedClient({ cards }: Props) {
 
           {/* 카드 인덱스 */}
           <span className="text-xs text-white/30 font-medium">
-            {currentCardIndex + 1}/{cards.length}
+            {currentCardIndex + 1}/{shuffledCards.length}
           </span>
         </div>
 
