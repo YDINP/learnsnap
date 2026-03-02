@@ -1,11 +1,11 @@
-export type CategoryKey = 'grammar' | 'knowledge' | 'hanja';
+export type CategoryKey = 'grammar' | 'knowledge' | 'hanja' | 'idiom' | 'spelling' | 'math' | 'science' | 'history';
 export type Difficulty = 1 | 2 | 3;
 
 // 재사용 스텝 타입 (SnapWise 호환)
 export type SharedStepType = 'cinematic-hook' | 'narration' | 'impact' | 'fact' | 'vs' | 'stat' | 'data-viz' | 'reveal-title' | 'outro';
 
 // LearnSnap 전용 스텝 타입
-export type LearnStepType = 'concept' | 'example' | 'quiz' | 'formula' | 'steps' | 'memory-tip' | 'summary';
+export type LearnStepType = 'concept' | 'example' | 'quiz' | 'formula' | 'steps' | 'memory-tip' | 'summary' | 'story' | 'behind' | 'real-world' | 'why-matter';
 
 // 전체 스텝 타입 유니언
 export type StepType = SharedStepType | LearnStepType;
