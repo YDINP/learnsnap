@@ -288,15 +288,10 @@ export function FeedClient({ cards }: Props) {
             ✕
           </Link>
 
-          {/* 카테고리 + 스텝 타입 */}
-          <div className="flex items-center gap-2">
-            {cat && (
-              <span className="text-xs text-white/40 font-medium">
-                {cat.emoji} {cat.label}
-              </span>
-            )}
-            <span className="rounded-full bg-black/30 backdrop-blur-sm px-2.5 py-1 text-[10px] text-white/50">
-              {step.type}
+          {/* 앱 브랜드 타이틀 */}
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-sm font-bold tracking-wide text-white/80">
+              LearnSnap
             </span>
           </div>
 
@@ -451,9 +446,14 @@ export function FeedClient({ cards }: Props) {
               <p className="text-sm font-bold text-white/90 break-words max-w-[200px]" style={{ wordBreak: 'keep-all' }}>
                 {card.title}
               </p>
-              <span className="text-xs" style={{ color: cat?.accent ?? '#6366f1' }}>
-                {cat?.emoji} {cat?.label}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs" style={{ color: cat?.accent ?? '#6366f1' }}>
+                  {cat?.emoji} {cat?.label}
+                </span>
+                <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/40">
+                  {step.type}
+                </span>
+              </div>
             </div>
           </motion.div>
         )}
