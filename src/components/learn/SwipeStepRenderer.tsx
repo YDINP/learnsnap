@@ -300,14 +300,13 @@ function SummaryView({ step, card, isActive }: { step: CardStep; card: CardMeta;
   const points = step.content.split('\n').filter(Boolean);
 
   return (
-    <div className="relative flex h-full w-full flex-col overflow-hidden px-5 pt-14 pb-8">
+    <div className="relative flex h-full w-full flex-col justify-center overflow-hidden px-5 py-8">
       {/* 배경 글로우 */}
       <motion.div
         initial={{ opacity: 0, scale: 0.6 }}
         animate={isActive ? { opacity: 1, scale: 1 } : { opacity: 0 }}
         transition={{ duration: 0.7, ease: 'easeOut' }}
-        className="absolute inset-0 flex items-start justify-center pointer-events-none"
-        style={{ paddingTop: '15%' }}
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
       >
         <div
           className="w-80 h-80 rounded-full blur-3xl"

@@ -186,6 +186,15 @@ export function FeedClient({ cards }: Props) {
     isSwiping.current = false;
   }, []);
 
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+    // 세로 스와이프가 우세할 때 기본 스크롤 방지
+    if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx) * 1.2) {
+      e.preventDefault();
+    }
+  }, []);
+
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     const dx = e.changedTouches[0].clientX - touchStartX.current;
     const dy = e.changedTouches[0].clientY - touchStartY.current;
@@ -263,6 +272,7 @@ export function FeedClient({ cards }: Props) {
       className="relative w-full h-dvh bg-[#0d0d0d] overflow-hidden flex flex-col"
       onClick={handleTap}
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {/* ── 상단 오버레이 UI (z-50) ── */}
