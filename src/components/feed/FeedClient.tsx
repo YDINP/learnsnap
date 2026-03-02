@@ -71,12 +71,15 @@ const CARD_CHANGE_MOTION: MotionConfig = {
 };
 
 export function FeedClient({ cards }: Props) {
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [currentCardIndex, setCurrentCardIndex] = useState(() =>
+    cards.length > 0 ? Math.floor(Math.random() * cards.length) : 0
+  );
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [isCardTransition, setIsCardTransition] = useState(false);
   const [showTapHint, setShowTapHint] = useState(false);
   const [showProgressHint, setShowProgressHint] = useState(false);
+  const [showCardInfo, setShowCardInfo] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
@@ -98,6 +101,13 @@ export function FeedClient({ cards }: Props) {
       setShowTapHint(false);
     }
   }, [currentStep, currentCardIndex]);
+
+  /* ── 카드 전환 시 카드 정보 오버레이 (2.5초) ── */
+  useEffect(() => {
+    setShowCardInfo(true);
+    const timer = setTimeout(() => setShowCardInfo(false), 2500);
+    return () => clearTimeout(timer);
+  }, [currentCardIndex]);
 
   /* ── 진행 힌트 화살표 (3초 정지 후 등장) ── */
   const resetHintTimer = useCallback(() => {
@@ -178,7 +188,18 @@ export function FeedClient({ cards }: Props) {
         resetHintTimer();
       }
     }
-  }, [goNext, goPrev, resetHintTimer, currentCardIndex, cards.length]);
+    // 세로 스와이프 아래로 (이전 카드로 직접 이동)
+    else if (dy > 60 && Math.abs(dy) > Math.abs(dx) * 1.4) {
+      isSwiping.current = true;
+      if (currentCardIndex > 0) {
+        const prevCard = cards[currentCardIndex - 1];
+        setIsCardTransition(true);
+        setCurrentCardIndex(i => i - 1);
+        setCurrentStep(prevCard ? prevCard.steps.length - 1 : 0);
+        resetHintTimer();
+      }
+    }
+  }, [goNext, goPrev, resetHintTimer, currentCardIndex, cards.length, cards]);
 
   /* ── 탭 핸들러 (좌 30% = 이전, 우 70% = 다음) ── */
   const handleTap = useCallback((e: React.MouseEvent) => {
@@ -394,6 +415,29 @@ export function FeedClient({ cards }: Props) {
             >
               ›
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── 카드 전환 시 카드 정보 오버레이 ── */}
+      <AnimatePresence>
+        {showCardInfo && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.4 }}
+            className="pointer-events-none absolute bottom-32 left-1/2 -translate-x-1/2 z-40"
+          >
+            <div className="flex flex-col items-center gap-1 rounded-2xl bg-black/60 backdrop-blur-sm px-5 py-3 text-center">
+              <span className="text-2xl">{card.emoji}</span>
+              <p className="text-sm font-bold text-white/90 break-words max-w-[200px]" style={{ wordBreak: 'keep-all' }}>
+                {card.title}
+              </p>
+              <span className="text-xs" style={{ color: cat?.accent ?? '#6366f1' }}>
+                {cat?.emoji} {cat?.label}
+              </span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
