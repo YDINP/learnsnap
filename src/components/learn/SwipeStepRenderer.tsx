@@ -5,6 +5,17 @@ import { motion } from 'motion/react';
 import { CardStep, CardMeta } from '@/types/content';
 import { CATEGORIES } from '@/lib/categories';
 
+/** 마크다운 강조 문법을 제거하고 일반 텍스트로 반환 */
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')  // **bold** 제거
+    .replace(/\*(.*?)\*/g, '$1')       // *italic* 제거
+    .replace(/__(.*?)__/g, '$1')       // __bold__ 제거
+    .replace(/_(.*?)_/g, '$1')         // _italic_ 제거
+    .replace(/`(.*?)`/g, '$1')         // `code` 제거
+    .trim();
+}
+
 interface Props {
   step: CardStep;
   card: CardMeta;
@@ -24,7 +35,7 @@ function CinematicHookView({ step, card, isActive }: { step: CardStep; card: Car
   const lines = step.content.split('\n').filter(l => l.trim());
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden px-8">
+    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden px-6">
       {/* 배경 그라데이션 글로우 */}
       <motion.div
         initial={{ opacity: 0, scale: 0.6 }}
@@ -56,7 +67,7 @@ function CinematicHookView({ step, card, isActive }: { step: CardStep; card: Car
           hidden: {},
           visible: { transition: { staggerChildren: 0.12, delayChildren: 0.25 } },
         }}
-        className="relative z-10 flex flex-col items-center gap-2 text-center"
+        className="relative z-10 flex flex-col items-center gap-2 text-center w-full"
       >
         {lines.map((line, i) => (
           <motion.p
@@ -65,10 +76,10 @@ function CinematicHookView({ step, card, isActive }: { step: CardStep; card: Car
               hidden: { opacity: 0, y: 12 },
               visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
             }}
-            className="text-lg font-medium text-white/90 leading-snug"
+            className="text-base md:text-lg font-medium text-white/90 leading-relaxed break-words"
             style={{ wordBreak: 'keep-all' }}
           >
-            {line}
+            {stripMarkdown(line)}
           </motion.p>
         ))}
       </motion.div>
@@ -103,7 +114,7 @@ function ConceptView({ step, isActive }: { step: CardStep; isActive: boolean }) 
         className="bg-blue-950/50 border-l-4 border-blue-500 rounded-r-2xl p-5"
       >
         <div className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-3">핵심 개념</div>
-        <p className="text-gray-200 text-base leading-relaxed whitespace-pre-line">{step.content}</p>
+        <p className="text-gray-200 text-base leading-relaxed whitespace-pre-line break-words">{stripMarkdown(step.content)}</p>
       </motion.div>
     </div>
   );
@@ -134,7 +145,7 @@ function ExampleView({ step, isActive }: { step: CardStep; isActive: boolean }) 
             className="flex gap-3 items-start bg-emerald-950/30 border border-emerald-900/40 rounded-xl p-3"
           >
             <span className="text-emerald-500 font-bold mt-0.5 shrink-0">•</span>
-            <p className="text-gray-300 text-sm">{line.replace(/^[-•✅]\s*/, '')}</p>
+            <p className="text-gray-300 text-sm leading-relaxed break-words">{stripMarkdown(line.replace(/^[-•✅]\s*/, ''))}</p>
           </motion.div>
         ))}
       </motion.div>
@@ -166,7 +177,7 @@ function QuizView({ step, isActive }: { step: CardStep; isActive: boolean }) {
         className="bg-violet-950/50 border border-violet-900/50 rounded-2xl p-5"
       >
         <div className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-3">퀴즈</div>
-        <p className="text-gray-200 font-medium mb-5 leading-relaxed">{question}</p>
+        <p className="text-gray-200 font-medium mb-5 leading-relaxed break-words">{stripMarkdown(question)}</p>
         <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
           {options.map((opt) => {
             const isSelected = selected === opt.key;
@@ -186,7 +197,7 @@ function QuizView({ step, isActive }: { step: CardStep; isActive: boolean }) {
                     : 'bg-[#1a1a1a] border-gray-800 hover:border-violet-600 text-gray-300 active:scale-[0.98]'
                 }`}
               >
-                <span className="font-bold mr-2">{opt.key})</span>{opt.text}
+                <span className="font-bold mr-2">{opt.key})</span>{stripMarkdown(opt.text)}
               </button>
             );
           })}
@@ -217,8 +228,8 @@ function FormulaView({ step, isActive }: { step: CardStep; isActive: boolean }) 
       >
         <div className="text-xs font-bold text-amber-500 uppercase tracking-wider mb-4">공식 / 규칙</div>
         <div className="bg-amber-950/30 border border-amber-900/50 rounded-2xl p-6">
-          <p className="font-mono text-xl font-bold text-amber-300 whitespace-pre-line leading-relaxed">
-            {step.content}
+          <p className="font-mono text-base md:text-xl font-bold text-amber-300 whitespace-pre-line leading-relaxed break-words">
+            {stripMarkdown(step.content)}
           </p>
         </div>
       </motion.div>
@@ -246,7 +257,7 @@ function MemoryTipView({ step, isActive }: { step: CardStep; isActive: boolean }
         </motion.span>
         <div>
           <div className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">암기 팁</div>
-          <p className="text-gray-200 text-sm leading-relaxed whitespace-pre-line">{step.content}</p>
+          <p className="text-gray-200 text-sm leading-relaxed whitespace-pre-line break-words">{stripMarkdown(step.content)}</p>
         </div>
       </motion.div>
     </div>
@@ -274,7 +285,7 @@ function StepsView({ step, isActive }: { step: CardStep; isActive: boolean }) {
             <span className="w-6 h-6 rounded-full bg-cyan-900/70 border border-cyan-700 flex items-center justify-center text-xs font-bold text-cyan-400 shrink-0 mt-0.5">
               {i + 1}
             </span>
-            <p className="text-gray-300 text-sm pt-0.5">{line.replace(/^\d+[.)]\s*/, '')}</p>
+            <p className="text-gray-300 text-sm pt-0.5 leading-relaxed break-words">{stripMarkdown(line.replace(/^\d+[.)]\s*/, ''))}</p>
           </motion.div>
         ))}
       </motion.div>
@@ -312,7 +323,7 @@ function SummaryView({ step, card, isActive }: { step: CardStep; card: CardMeta;
               className="flex gap-3 text-sm"
             >
               <span className="font-bold shrink-0" style={{ color: cat?.accent ?? '#6366f1' }}>{i + 1}.</span>
-              <span className="text-gray-300">{p.replace(/^\d+\.\s*/, '')}</span>
+              <span className="text-gray-300 leading-relaxed break-words">{stripMarkdown(p.replace(/^\d+\.\s*/, ''))}</span>
             </motion.li>
           ))}
         </motion.ol>
@@ -342,7 +353,7 @@ function ImpactView({ step, card, isActive }: { step: CardStep; card: CardMeta; 
         />
       </motion.div>
 
-      <div className="relative z-10 flex flex-col items-center gap-6 px-8 max-w-sm">
+      <div className="relative z-10 flex flex-col items-center gap-6 px-6 w-full max-w-sm">
         <motion.div
           initial={{ scaleX: 0 }}
           animate={isActive ? { scaleX: 1 } : {}}
@@ -354,16 +365,16 @@ function ImpactView({ step, card, isActive }: { step: CardStep; card: CardMeta; 
           initial="hidden"
           animate={isActive ? 'visible' : 'hidden'}
           variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } } }}
-          className="flex flex-col items-center gap-3"
+          className="flex flex-col items-center gap-3 w-full"
         >
           {lines.map((line, i) => (
             <motion.p
               key={i}
               variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}
-              className={`text-center ${fontSize} font-bold text-white/90`}
+              className={`text-center ${fontSize} font-bold text-white/90 leading-relaxed break-words w-full`}
               style={{ wordBreak: 'keep-all' }}
             >
-              {line}
+              {stripMarkdown(line)}
             </motion.p>
           ))}
         </motion.div>
@@ -383,7 +394,7 @@ function ImpactView({ step, card, isActive }: { step: CardStep; card: CardMeta; 
 function NarrationView({ step, isActive }: { step: CardStep; isActive: boolean }) {
   const lines = step.content.split('\n').filter(l => l.trim());
   return (
-    <div className="flex h-full w-full flex-col justify-center px-6 py-6">
+    <div className="flex h-full w-full flex-col justify-center px-5 py-6">
       <motion.div
         initial="hidden"
         animate={isActive ? 'visible' : 'hidden'}
@@ -394,10 +405,10 @@ function NarrationView({ step, isActive }: { step: CardStep; isActive: boolean }
           <motion.p
             key={i}
             variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
-            className="text-gray-200 text-base leading-relaxed"
+            className="text-gray-200 text-base leading-loose break-words"
             style={{ wordBreak: 'keep-all' }}
           >
-            {line}
+            {stripMarkdown(line)}
           </motion.p>
         ))}
       </motion.div>
@@ -417,7 +428,7 @@ function VsView({ step, isActive }: { step: CardStep; isActive: boolean }) {
         className="bg-[#1a1a1a] border border-gray-700/60 rounded-2xl p-5"
       >
         <div className="text-xs font-bold text-orange-400 uppercase tracking-wider mb-3">비교</div>
-        <p className="text-gray-300 text-sm whitespace-pre-line leading-relaxed">{step.content}</p>
+        <p className="text-gray-300 text-sm whitespace-pre-line leading-relaxed break-words">{stripMarkdown(step.content)}</p>
       </motion.div>
     </div>
   );
@@ -434,7 +445,7 @@ function DataView({ step, isActive, label }: { step: CardStep; isActive: boolean
         className="bg-[#1a1a1a] border border-gray-700/60 rounded-2xl p-5"
       >
         <div className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-3">{label}</div>
-        <p className="text-gray-300 text-sm whitespace-pre-line leading-relaxed">{step.content}</p>
+        <p className="text-gray-300 text-sm whitespace-pre-line leading-relaxed break-words">{stripMarkdown(step.content)}</p>
       </motion.div>
     </div>
   );
@@ -470,10 +481,10 @@ function RevealTitleView({ step, card, isActive }: { step: CardStep; card: CardM
           initial={{ opacity: 0, y: 20, scale: 0.9 }}
           animate={isActive ? { opacity: 1, y: 0, scale: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-2xl font-bold text-white leading-snug"
+          className="text-xl md:text-2xl font-bold text-white leading-relaxed break-words"
           style={{ wordBreak: 'keep-all' }}
         >
-          {step.content}
+          {stripMarkdown(step.content)}
         </motion.p>
         {card.learningGoal && (
           <motion.p
@@ -530,9 +541,9 @@ function OutroView({ step, card, isActive, isLastCard }: { step: CardStep; card:
             initial={{ opacity: 0 }}
             animate={isActive ? { opacity: 1 } : {}}
             transition={{ delay: 0.6 }}
-            className="text-gray-400 text-sm leading-relaxed max-w-xs"
+            className="text-gray-400 text-sm leading-relaxed max-w-xs break-words"
           >
-            {step.content}
+            {stripMarkdown(step.content)}
           </motion.p>
         )}
         <motion.p
@@ -588,8 +599,8 @@ export function SwipeStepRenderer({ step, card, isActive, stepIndex, totalSteps,
       return <OutroView step={step} card={card} isActive={isActive} isLastCard={isLastCard} />;
     default:
       return (
-        <div className="flex h-full w-full flex-col justify-center px-6 py-6">
-          <p className="text-gray-200 text-base leading-relaxed whitespace-pre-line">{step.content}</p>
+        <div className="flex h-full w-full flex-col justify-center px-5 py-6">
+          <p className="text-gray-200 text-base leading-relaxed whitespace-pre-line break-words">{stripMarkdown(step.content)}</p>
         </div>
       );
   }
