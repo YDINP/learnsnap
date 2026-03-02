@@ -293,40 +293,98 @@ function StepsView({ step, isActive }: { step: CardStep; isActive: boolean }) {
   );
 }
 
-/** summary — 핵심 정리 */
+/** summary — 핵심 정리 (풀스크린 시네마틱) */
 function SummaryView({ step, card, isActive }: { step: CardStep; card: CardMeta; isActive: boolean }) {
   const cat = CATEGORIES.find(c => c.key === card.category);
+  const accent = cat?.accent ?? '#6366f1';
   const points = step.content.split('\n').filter(Boolean);
 
   return (
-    <div className="flex h-full w-full flex-col justify-center px-5 py-6">
+    <div className="relative flex h-full w-full flex-col overflow-hidden px-5 pt-14 pb-8">
+      {/* 배경 글로우 */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0 }}
-        transition={{ duration: 0.4 }}
-        className="bg-[#111] border border-gray-700/60 rounded-2xl p-5"
+        initial={{ opacity: 0, scale: 0.6 }}
+        animate={isActive ? { opacity: 1, scale: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.7, ease: 'easeOut' }}
+        className="absolute inset-0 flex items-start justify-center pointer-events-none"
+        style={{ paddingTop: '15%' }}
       >
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-xl">{card.emoji}</span>
-          <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">핵심 정리</div>
-        </div>
-        <motion.ol
-          initial="hidden"
-          animate={isActive ? 'visible' : 'hidden'}
-          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.09, delayChildren: 0.2 } } }}
-          className="space-y-2"
+        <div
+          className="w-80 h-80 rounded-full blur-3xl"
+          style={{ backgroundColor: `${accent}18` }}
+        />
+      </motion.div>
+
+      {/* 상단 타이틀 */}
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0 }}
+        transition={{ duration: 0.45, delay: 0.05 }}
+        className="relative z-10 flex flex-col items-center gap-1 mb-7 text-center"
+      >
+        <motion.span
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={isActive ? { scale: 1, opacity: 1 } : {}}
+          transition={{ duration: 0.4, delay: 0.1, type: 'spring', stiffness: 220 }}
+          className="text-4xl mb-1"
         >
-          {points.map((p, i) => (
-            <motion.li
-              key={i}
-              variants={{ hidden: { opacity: 0, x: -8 }, visible: { opacity: 1, x: 0 } }}
-              className="flex gap-3 text-sm"
+          {card.emoji}
+        </motion.span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: accent }}>✦</span>
+          <span className="text-xs font-bold tracking-[0.18em] uppercase" style={{ color: accent }}>핵심 정리</span>
+          <span className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: accent }}>✦</span>
+        </div>
+      </motion.div>
+
+      {/* 포인트 카드 목록 */}
+      <motion.ol
+        initial="hidden"
+        animate={isActive ? 'visible' : 'hidden'}
+        variants={{
+          hidden: {},
+          visible: { transition: { staggerChildren: 0.12, delayChildren: 0.28 } },
+        }}
+        className="relative z-10 flex flex-col gap-3"
+      >
+        {points.map((p, i) => (
+          <motion.li
+            key={i}
+            variants={{
+              hidden: { opacity: 0, y: 18 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.42, ease: 'easeOut' } },
+            }}
+            className="flex items-start gap-3 rounded-xl px-4 py-3"
+            style={{
+              backgroundColor: `${accent}10`,
+              border: `1px solid ${accent}28`,
+            }}
+          >
+            {/* 번호 배지 */}
+            <span
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-black mt-0.5"
+              style={{ backgroundColor: accent }}
             >
-              <span className="font-bold shrink-0" style={{ color: cat?.accent ?? '#6366f1' }}>{i + 1}.</span>
-              <span className="text-gray-300 leading-relaxed break-words">{stripMarkdown(p.replace(/^\d+\.\s*/, ''))}</span>
-            </motion.li>
-          ))}
-        </motion.ol>
+              {i + 1}
+            </span>
+            <span className="text-[15px] text-gray-200 leading-relaxed break-words" style={{ wordBreak: 'keep-all' }}>
+              {stripMarkdown(p.replace(/^\d+\.\s*/, ''))}
+            </span>
+          </motion.li>
+        ))}
+      </motion.ol>
+
+      {/* 하단 카드 타이틀 fade-in */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={isActive ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.5, delay: 0.28 + points.length * 0.12 + 0.2 }}
+        className="relative z-10 mt-6 flex flex-col items-center gap-1 text-center"
+      >
+        <div className="h-px w-10 mb-2" style={{ backgroundColor: `${accent}50` }} />
+        <p className="text-[13px] font-medium" style={{ color: `${accent}CC` }}>
+          ✦ {card.title}
+        </p>
       </motion.div>
     </div>
   );
