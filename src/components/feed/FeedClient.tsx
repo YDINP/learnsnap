@@ -442,9 +442,9 @@ export function FeedClient({ cards }: Props) {
         )}
       </AnimatePresence>
 
-      {/* ── outro 세로 스와이프 힌트 (다음 카드가 있을 때) ── */}
+      {/* ── 세로 스와이프 힌트 (어느 스텝에서나 표시) ── */}
       <AnimatePresence>
-        {isOutro && !isLastCard && showProgressHint && (
+        {!isLastCard && showProgressHint && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
