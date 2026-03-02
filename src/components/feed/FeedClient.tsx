@@ -197,8 +197,8 @@ export function FeedClient({ cards }: Props) {
       if (dx < 0) goNext();
       else goPrev();
     }
-    // 세로 스와이프 위로 (다음 카드로 직접 이동)
-    else if (dy < -60 && Math.abs(dy) > Math.abs(dx) * 1.4) {
+    // 세로 스와이프 아래로 (다음 카드로 이동 — 숏폼 방식)
+    else if (dy > 60 && Math.abs(dy) > Math.abs(dx) * 1.4) {
       isSwiping.current = true;
       if (currentCardIndex < shuffledCards.length - 1) {
         setIsCardTransition(true);
@@ -207,8 +207,8 @@ export function FeedClient({ cards }: Props) {
         resetHintTimer();
       }
     }
-    // 세로 스와이프 아래로 (이전 카드로 직접 이동)
-    else if (dy > 60 && Math.abs(dy) > Math.abs(dx) * 1.4) {
+    // 세로 스와이프 위로 (이전 카드로 이동)
+    else if (dy < -60 && Math.abs(dy) > Math.abs(dx) * 1.4) {
       isSwiping.current = true;
       if (currentCardIndex > 0) {
         const prevCard = shuffledCards[currentCardIndex - 1];
