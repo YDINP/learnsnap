@@ -38,7 +38,7 @@ export function FeedClient({ cards }: Props) {
   if (cards.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-400">카드가 없습니다.</p>
+        <p className="text-gray-600">카드가 없습니다.</p>
       </div>
     );
   }
@@ -52,24 +52,24 @@ export function FeedClient({ cards }: Props) {
   return (
     <div
       ref={containerRef}
-      className="min-h-screen bg-gray-50 flex flex-col"
+      className="min-h-screen bg-[#0d0d0d] flex flex-col"
       onClick={goNextStep}
     >
       {/* 상단 바 */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
-        <Link href="/" onClick={e => e.stopPropagation()} className="text-gray-400 hover:text-gray-600">
+      <div className="sticky top-0 z-10 bg-[#0d0d0d] border-b border-gray-800 px-4 py-3 flex items-center justify-between">
+        <Link href="/" onClick={e => e.stopPropagation()} className="text-gray-600 hover:text-gray-400">
           ✕
         </Link>
         <span className="text-sm text-gray-500">
           {cat?.emoji} {cat?.label}
         </span>
-        <span className="text-sm text-gray-400">
+        <span className="text-sm text-gray-600">
           {currentIndex + 1}/{cards.length}
         </span>
       </div>
 
       {/* 진행바 */}
-      <div className="h-1 bg-gray-200">
+      <div className="h-0.5 bg-gray-800">
         <div
           className="h-full bg-indigo-500 transition-all duration-300"
           style={{ width: `${progress}%` }}
@@ -82,9 +82,9 @@ export function FeedClient({ cards }: Props) {
         {currentStep === 0 && (
           <div className="mb-4">
             <span className="text-4xl">{card.emoji}</span>
-            <h2 className="text-xl font-bold text-gray-900 mt-2">{card.title}</h2>
+            <h2 className="text-xl font-bold text-white mt-2">{card.title}</h2>
             {card.learningGoal && (
-              <p className="text-sm text-indigo-600 mt-1">🎯 {card.learningGoal}</p>
+              <p className="text-sm text-indigo-400 mt-1">🎯 {card.learningGoal}</p>
             )}
           </div>
         )}
@@ -96,20 +96,20 @@ export function FeedClient({ cards }: Props) {
       </div>
 
       {/* 하단 네비 */}
-      <div className="sticky bottom-0 bg-white border-t border-gray-100 px-4 py-3 flex items-center justify-between">
+      <div className="sticky bottom-0 bg-[#0d0d0d] border-t border-gray-800 px-4 py-3 flex items-center justify-between">
         <button
           onClick={e => { e.stopPropagation(); goPrevStep(); }}
-          className="text-gray-400 hover:text-gray-700 px-4 py-2 rounded-xl text-sm disabled:opacity-30"
+          className="text-gray-600 hover:text-gray-300 px-4 py-2 rounded-xl text-sm disabled:opacity-30"
           disabled={currentIndex === 0 && currentStep === 0}
         >
           ← 이전
         </button>
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-gray-600">
           {currentStep + 1} / {card.steps.length}
         </span>
         <button
           onClick={e => { e.stopPropagation(); goNextStep(); }}
-          className="text-indigo-600 hover:text-indigo-800 px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-30"
+          className="text-indigo-400 hover:text-indigo-300 px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-30"
           disabled={currentIndex === cards.length - 1 && currentStep === card.steps.length - 1}
         >
           다음 →
