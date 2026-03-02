@@ -281,7 +281,7 @@ export function FeedClient({ cards }: Props) {
         <div className="flex items-center justify-between px-4 py-2 pointer-events-none">
           {/* 닫기 버튼 */}
           <Link
-            href="/"
+            href="/browse"
             onClick={(e) => e.stopPropagation()}
             className="pointer-events-auto rounded-full bg-black/30 backdrop-blur-sm px-3 py-1.5 text-xs text-white/60 font-medium hover:bg-black/50 transition-colors"
           >
@@ -365,7 +365,7 @@ export function FeedClient({ cards }: Props) {
 
         {isLast ? (
           <Link
-            href="/"
+            href="/browse"
             onClick={(e) => e.stopPropagation()}
             className="pointer-events-auto rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-all"
             style={{ backgroundColor: cat?.accent ?? '#6366f1' }}
